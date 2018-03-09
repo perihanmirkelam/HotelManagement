@@ -1,5 +1,9 @@
 package com.pmirkelam.record;
 
+import com.pmirkelam.Ask;
+import com.pmirkelam.RecordListener;
+import com.pmirkelam.users.User;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +12,7 @@ import static com.pmirkelam.Constants.AVAILABLE;
 import static com.pmirkelam.Constants.FILE_NAME;
 import static com.pmirkelam.Constants.TOTAL_ROOM_NUMBER;
 
-public class RecordFile {
+public class RecordFile implements Ask.UserListener {
 
     private final String COMMA_DELIMITER = ",";
     private final String NEW_LINE_SEPARATOR = "\n";
@@ -16,6 +20,7 @@ public class RecordFile {
     private FileWriter fileWriter;
     private FileWriter addRecordFileWriter;
     private FileWriter initFileWriter;
+
 
     private String fileName;
     private List<Record> records;
@@ -32,9 +37,12 @@ public class RecordFile {
     private StringBuilder stringBuilder;
 
     private RecordFile() {
-        System.out.println("RecordFile constructor");
+        Ask.getInstance().setUserListener(this);
+        System.out.println("user.setUserListener(this)");
         this.fileName = FILE_NAME;
         createRecordFile();
+
+        //setRecordListener(this);
     }
 
     public static RecordFile getInstance() {
@@ -177,7 +185,7 @@ public class RecordFile {
     }
 
     /**
-     *  
+     *
      * @return index of available room. If not exist return -1
      */
     public int getFirstAvailableRoom() {
@@ -191,7 +199,7 @@ public class RecordFile {
         return -1;
     }
 
-    public void addRecords(Record record) {
+    public void addRecord(Record record) {
 
         int availableRoom = getFirstAvailableRoom();
         if(availableRoom != -1) {
@@ -208,7 +216,7 @@ public class RecordFile {
 
             try {
 
-                addRecordFileWriter.append("" + record.getRoomId());
+                addRecordFileWriter.append("" + availableRoom);
                 addRecordFileWriter.append(COMMA_DELIMITER);
 
                 addRecordFileWriter.append("" + record.getAvailability());
@@ -238,5 +246,43 @@ public class RecordFile {
         } else {
             System.out.println("Sorry! There is no any available room now.");
         }
+    }
+
+//    @Override
+//    public void onBookAdd(int guestId) {
+//        System.out.println("onBookAdd");
+//
+//    }
+//
+//    @Override
+//    public void onCancelReservation(int guestId) {
+//        System.out.println("onCancelReservation");
+//
+//    }
+//
+//    @Override
+//    public void onCheckIn(int guestId) {
+////TODO: onceden book kontrol var mı ekle
+//        System.out.println("onCheckIn");
+//    }
+//
+//    @Override
+//    public void onCheckOut(int guestId) {
+//        System.out.println("onCheckOut");
+//
+//    }
+//
+//    public RecordListener recordListener = null;
+//
+//    public void setRecordListener(RecordListener recordListener){
+//        System.out.println("onCheckOut");
+//
+//        this.recordListener = recordListener;
+//    }
+
+    @Override
+    public void onRecordRequested(int guestId, int recordType) {
+        System.out.println("RecordFile onRecordRequested " );
+
     }
 }

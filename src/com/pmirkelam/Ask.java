@@ -1,18 +1,12 @@
 package com.pmirkelam;
 
-import com.pmirkelam.record.Record;
-import com.pmirkelam.record.RecordFile;
 import com.pmirkelam.users.Guest;
 import com.pmirkelam.users.Receptionist;
 import com.pmirkelam.users.User;
 
-import java.util.List;
 import java.util.Scanner;
 
 import static com.pmirkelam.Constants.*;
-
-import javax.jws.soap.SOAPBinding;
-import java.util.Scanner;
 
 import static com.pmirkelam.Constants.RECORDER_TYPE_GUEST;
 import static com.pmirkelam.Constants.RECORDER_TYPE_RECEPTIONIST;
@@ -21,15 +15,23 @@ public class Ask {
 
     private Receptionist receptionist;
     private Guest guest;
+    private UserListener userListener = null;
+    private static Ask instance = null;
 
-    public Ask() {
+    private Ask() {
+    }
 
+    public static Ask getInstance(){
+        if(instance == null){
+            instance = new Ask();
+        }
+        return instance;
     }
 
     /**
      * Determine user type whether receptionist or guest.
      */
-    public void startAsk(){
+    public void startAsk() {
 
         Scanner reader = new Scanner(System.in);
         System.out.println("Enter 1 for receptionists, 2 for guests: ");
@@ -59,14 +61,15 @@ public class Ask {
 
         Scanner reader = new Scanner(System.in);
         User receptionist = (User) new Receptionist(guestId);
-        User clientGuest = (User) new Guest(guestId);
+       // User clientGuest = (User) new Guest(guestId);
         System.out.println("Enter 1 for book a room, 2 for cancel a reservation, 3 for check-in a room, "
                 + "4 for check-out a room, 0 for back: ");
         int operation = reader.nextInt();
         switch (operation) {
 
             case BOOK:
-                receptionist.Book(guestId);
+                book2(guestId, 1);
+                //receptionist.Book(guestId);
                 break;
 
             case CANCEL_RESERVATION:
@@ -74,16 +77,13 @@ public class Ask {
                 break;
 
             case CHECKED_IN:
-                System.out.println("If you do not have any reservation enter 1, have a reservation enter 2;");
+                System.out.println("If you have not booked before enter 1, have already booked enter 2: ");
                 if (reader.nextInt() == 1) {
-                    int roomId = findReservedRoom(guestId);
-                    if (roomId != -1) {
-                        receptionist.CheckIn(guestId, roomId);
-                    } else {
-                        reader.close();
-                        System.out.println("You do not have any reservation. Checking in you an available room...");
-                        receptionist.CheckIn(guestId, RecordFile.getInstance().getFirstAvailableRoom());
-                    }
+                    receptionist.CheckIn(guestId);
+                } else {
+                    reader.close();
+                    System.out.println("You do not have any reservation. Checking in you an available room...");
+                    receptionist.CheckIn(guestId);
                 }
                 break;
 
@@ -96,7 +96,7 @@ public class Ask {
                 break;
 
             default:
-                System.out.println("Wrong enter, try again!");
+                System.out.println("Invalid enter, try again!");
                 reader.close();
                 operationForReceptionist(guestId);
                 break;
@@ -133,24 +133,27 @@ public class Ask {
 
     }
 
-    private void askNameAndPassword() {
-
-    }
-    private void loginForReceptionist(){
-
+    private void checkLogin() {
+        //TODO: user auth
     }
 
-    private int findReservedRoom(int guestId) {
+    private void book2(int guestId, int type) {
+        System.out.println("book2 Ask");
+        if (userListener != null) {
+            userListener.onRecordRequested(guestId, type);
 
-        List<Record> records = RecordFile.getInstance().getRecordList();
-        int index = -1;
-
-        for (Record record : records) {
-            if (record.getGuestId() == guestId && record.getAvailability() == RESERVED) {
-                index = record.getRoomId();
-                break;
-            }
+        } else {
+            System.out.println("book2 Ask userListener is null.");
         }
-        return index;
     }
+
+    public void setUserListener(UserListener userListener) {
+        System.out.println("setUserListener");
+        this.userListener = userListener;
+    }
+
+    public interface UserListener {
+        void onRecordRequested(int guestId, int recordType);
+    }
+
 }

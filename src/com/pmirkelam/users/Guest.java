@@ -8,35 +8,22 @@ import java.util.List;
 
 public class Guest extends User {
 
-    private int guestId;
-    private String guestName;
     private int id;
-    private RecordFile recordFile;
-    private List<Record> records;
 
     public Guest(int id) {
-        super(id);
-        this.guestId = id;
-        recordFile = RecordFile.getInstance();
-        records = recordFile.getRecordList();
-    }
-
-    @Override
-    public List<Record> getList() {
-        return super.getList();
+        this.id = id;
     }
 
     @Override
     public void Book(int guestId) {
+        System.out.println("Book");
         super.Book(guestId);
     }
 
     @Override
     public void CancelReservation(int guestId) {
+        System.out.println("CancelReservation");
         super.CancelReservation(guestId);
     }
 
-    public int getUserId() {
-        return guestId;
-    }
 }

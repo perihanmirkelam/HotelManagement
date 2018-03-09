@@ -1,52 +1,49 @@
 package com.pmirkelam.users;
 
+import com.pmirkelam.RecordListener;
 import com.pmirkelam.record.Record;
-import com.pmirkelam.record.RecordFile;
 
 import java.util.List;
-
-import static com.pmirkelam.Constants.AVAILABLE;
-import static com.pmirkelam.Constants.RESERVED;
 
 public class User {
 
     private int userId;
-    private RecordFile recordFile;
     private List<Record> records;
+    private RecordListener recordListener = null;
 
-    public User(int userId){
-        this.userId = userId;
-        recordFile = RecordFile.getInstance();
-        records = recordFile.getRecordList();
+    public User() {
+        System.out.println("User created");
     }
 
-    public List<Record> getList(){
-        return records;
+    public void Book(int guestId) {
+        System.out.println("Book");
+
+        if(recordListener != null){
+            recordListener.onBookAdd(guestId);
+        }
+
     }
 
-    public void Book(int guestId){
-
-        for(Record recordElement : getList()){
-
-            if(recordElement.getAvailability() == AVAILABLE){
-                recordElement.setAvailability(RESERVED);
-                recordElement.setGuestId(guestId);
-                recordFile.changeRecord(recordElement);
-                System.out.println("Booked room: " + recordElement.toString());
-                break;
-            }
+    public void CancelReservation(int guestId) {
+        if(recordListener != null){
+            recordListener.onCancelReservation(guestId);
         }
     }
 
-    public void CancelReservation(int guestId){
-
-    }
-
-    public void CheckIn(int guestId, int roomId){
-
+    public void CheckIn(int guestId) {
+        if(recordListener != null){
+            recordListener.onCheckIn(guestId);
+        }
     }
 
     public void CheckOut(int guestId) {
+        if(recordListener != null){
+            recordListener.onCheckOut(guestId);
+        }
+    }
+
+    public void setRecordListener(RecordListener recordListener){
+        this.recordListener = recordListener;
     }
 
 }

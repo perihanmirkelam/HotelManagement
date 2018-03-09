@@ -21,8 +21,7 @@ public class Main {
         // write your code here
         System.out.println("Total Room Number: " + TOTAL_ROOM_NUMBER);
         recordFile = RecordFile.getInstance();
-        Ask ask = new Ask();
-        ask.startAsk();
+        Ask.getInstance().startAsk();
     }
 
 }
