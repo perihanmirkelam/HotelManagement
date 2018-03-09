@@ -33,14 +33,14 @@ public class Receptionist extends User {
     @Override
     public void Book(int guestId) {
         super.Book(guestId);
-        for(Record recordElement : getList()){
-            if(recordElement.getAvailability() == AVAILABLE){
-                recordElement.setAvailability(RESERVED);
-                recordElement.setGuestId(guestId);
-                System.out.println("Booked room: " + recordElement.toString());
+        for(Record recordLine : getList()){
+            if(recordLine.getAvailability() == AVAILABLE){
+                recordLine.setAvailability(RESERVED);
+                recordLine.setGuestId(guestId);
+                System.out.println("Booked room: " + recordLine.toString());
                 break;
             }
-            recordFile.addRecord(recordElement);
+            recordFile.changeRecord(recordLine);
         }
     }
 

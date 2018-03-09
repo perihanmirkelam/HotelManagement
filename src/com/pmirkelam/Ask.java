@@ -105,6 +105,7 @@ public class Ask {
     }
 
     private void operationForGuest(int guestId) {
+        User receptionist = (User) new Receptionist(guestId);
         Scanner reader = new Scanner(System.in);
         System.out.println("Enter 1 for book a room, 2 for cancel a reservation, 0 for back: ");
         int operation = reader.nextInt();
