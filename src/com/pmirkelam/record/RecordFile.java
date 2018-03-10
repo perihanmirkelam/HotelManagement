@@ -1,48 +1,29 @@
 package com.pmirkelam.record;
 
-import com.pmirkelam.Ask;
-import com.pmirkelam.RecordListener;
-import com.pmirkelam.users.User;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.pmirkelam.Constants.AVAILABLE;
-import static com.pmirkelam.Constants.FILE_NAME;
-import static com.pmirkelam.Constants.TOTAL_ROOM_NUMBER;
+import static com.pmirkelam.Constants.*;
 
-public class RecordFile implements Ask.UserListener {
+public class RecordFile {
 
     private final String COMMA_DELIMITER = ",";
     private final String NEW_LINE_SEPARATOR = "\n";
-    private final String FILE_HEADER = "Room ID, Availability, Guest ID";
-    private FileWriter fileWriter;
-    private FileWriter addRecordFileWriter;
-    private FileWriter initFileWriter;
 
+    //private FileWriter initFileWriter;
 
     private String fileName;
     private List<Record> records;
+
+    private Record record;
+
     private static RecordFile instance;
 
-    private BufferedReader fileReader;
-
-    private final int ROOM_ID = -1;
-    private final int AVAILABILITY = -1;
-    private final int GUEST_ID = -1;
-    private Record record;
-    private int roomNo;
-    private String line;
-    private StringBuilder stringBuilder;
-
     private RecordFile() {
-        Ask.getInstance().setUserListener(this);
-        System.out.println("user.setUserListener(this)");
         this.fileName = FILE_NAME;
         createRecordFile();
-
-        //setRecordListener(this);
+        printList();
     }
 
     public static RecordFile getInstance() {
@@ -59,19 +40,21 @@ public class RecordFile implements Ask.UserListener {
     private void createRecordFile() {
 
         try {
-            initFileWriter = new FileWriter(fileName,true);
+            FileWriter initFileWriter = new FileWriter(fileName, true);
+
         } catch (IOException e) {
             System.out.println("Error while creating record file!");
             e.printStackTrace();
         }
+
         records = getRecordList();
 
         if (records == null || records.size() <= 0) {
             System.out.println("It is the first time for creating record file.");
             initCsvFile();
+
         } else {
             System.out.println("There is already a record file. records.size: " + records.size());
-
         }
     }
 
@@ -80,11 +63,17 @@ public class RecordFile implements Ask.UserListener {
      */
     private void initCsvFile() {
 
+        FileWriter initFileWriter = null;
+        String FILE_HEADER = "Room ID, Availability, Guest ID";
+
         try {
+            initFileWriter = new FileWriter(fileName, true);
+
             initFileWriter.append(FILE_HEADER);
             initFileWriter.append(NEW_LINE_SEPARATOR);
             System.out.println("Record file was created successfully. Initializing...");
             Record initRecord;
+
             for (int i = 1; i <= TOTAL_ROOM_NUMBER; i++) {
                 initRecord = new Record(i, AVAILABLE, -1);
                 records.add(initRecord);
@@ -104,28 +93,27 @@ public class RecordFile implements Ask.UserListener {
 
                 } catch (Exception e) {
 
-                    System.out.println("Error while adding record to record file!");
+                    System.out.println("Error while adding record to record file! initCsvFile");
                     e.printStackTrace();
                 }
             }
 
         } catch (Exception e) {
-            System.out.println("Error while initializing record file!");
+            System.out.println("Error while initializing record file! initCsvFile");
             e.printStackTrace();
 
-        }
-        finally {
+        } finally {
 
             try {
                 if (initFileWriter != null) {
                     initFileWriter.flush();
                     initFileWriter.close();
                 } else {
-                    System.out.println("File writer is NULL!");
+                    System.out.println("File writer is NULL! initCsvFile");
                 }
 
             } catch (IOException e) {
-                System.out.println("Error while flushing/closing file writer on create csv file method!");
+                System.out.println("Error while flushing/closing file writer on create csv file method! initCsvFile");
                 e.printStackTrace();
             }
         }
@@ -136,28 +124,37 @@ public class RecordFile implements Ask.UserListener {
      * Read the file line by line starting from the second line and assign it to 'records' list.
      */
     public List<Record> getRecordList() {
-       // fileReader = null;
+
+        BufferedReader bufferedReader = null;
         try {
-
             records = new ArrayList<Record>();
-            line = "";
-            fileReader = new BufferedReader(new FileReader(fileName));
+            String line = "";
+            bufferedReader = new BufferedReader(new FileReader(fileName));
 
-            if(fileReader.readLine()!= null) {
-                while ((line = fileReader.readLine()) != null) {
+            if (bufferedReader.readLine() != null) {
 
-                    String[] tokens = line.split(COMMA_DELIMITER);
+                String[] tokens;
+
+                for (int i = 0; i < TOTAL_ROOM_NUMBER; i++) {
+
+                    line = bufferedReader.readLine();
+                    tokens = line.split(COMMA_DELIMITER);
 
                     if (tokens.length == 3) {
-
                         //Create a new record object and fill its data
-                        record = new Record(Integer.parseInt(tokens[0]),
-                                Integer.parseInt(tokens[1]),
-                                Integer.parseInt(tokens[2]));
-                        System.out.println("Adding list: " + record.toString());
-                        records.add(record);
+                        try {
+                            record = new Record(Integer.parseInt(tokens[0]),
+                                    Integer.parseInt(tokens[1]),
+                                    Integer.parseInt(tokens[2]));
+                            //System.out.println("Get list: " + record.toString());
+                            records.add(record);
+                        } catch (NumberFormatException e) {
+                            System.out.println("List size:" + records.size() + " Last record: " + records.get(records.size() - 1).toString());
+                            e.printStackTrace();
+                        }
                     }
                 }
+
             } else {
                 return records;
             }
@@ -169,8 +166,8 @@ public class RecordFile implements Ask.UserListener {
         } finally {
 
             try {
-                if (fileReader != null) {
-                    fileReader.close();
+                if (bufferedReader != null) {
+                    bufferedReader.close();
 
                 } else {
                     System.out.println("File reader is NULL!");
@@ -184,105 +181,140 @@ public class RecordFile implements Ask.UserListener {
         return records;
     }
 
+    public void printList() {
+        List<Record> list = getRecordList();
+        if (list != null && list.size() > 0) {
+            System.out.println("List Size: " + list.size());
+            for (int i = 0; i < list.size(); i++) {
+                System.out.println(list.get(i).toString());
+            }
+        } else {
+            System.out.println("Record list is null");
+        }
+    }
+
     /**
-     *
      * @return index of available room. If not exist return -1
      */
     public int getFirstAvailableRoom() {
 
-        List<Record> records = RecordFile.getInstance().getRecordList();
+        List<Record> records = getRecordList();
+        for (int i = 0; i < TOTAL_ROOM_NUMBER; i++) {
+            if (records.get(i).getAvailability() == AVAILABLE) {
+                return records.get(i).getRoomId();
+            }
+        }
+        return -1;
+    }
+
+    public int getRoomOfGuestId(int guestId) {
+
+        List<Record> records = getRecordList();
         for (Record record : records) {
-            if (record.getAvailability() == AVAILABLE) {
+            if (record.getGuestId() == guestId) {
                 return record.getRoomId();
             }
         }
         return -1;
     }
 
-    public void addRecord(Record record) {
+    private void writeFile(Record replacedRecord) {
 
-        int availableRoom = getFirstAvailableRoom();
-        if(availableRoom != -1) {
+        BufferedWriter bufferedWriter = null;
+        List<Record> list = getRecordList();
 
-            try {
-                addRecordFileWriter = new FileWriter(fileName, true);
+        try {
+            bufferedWriter = new BufferedWriter(new FileWriter(fileName, true));
 
-            } catch (IOException e) {
-                System.out.println("Error while creating record file!");
-                e.printStackTrace();
-            }
+            if (list != null) {
+                System.out.println("replacedRecord.getRoomId() : " + replacedRecord.getRoomId());
+                System.out.println("list.size() : " + list.size());
 
-            records.add(record);
+                list.set(replacedRecord.getRoomId()-1, replacedRecord);
+                Record recordListElement;
 
-            try {
+                for (int i = 0; i < TOTAL_ROOM_NUMBER; i++) {
 
-                addRecordFileWriter.append("" + availableRoom);
-                addRecordFileWriter.append(COMMA_DELIMITER);
+                    recordListElement = list.get(i);
+                    try {
+                        bufferedWriter.newLine();
 
-                addRecordFileWriter.append("" + record.getAvailability());
-                addRecordFileWriter.append(COMMA_DELIMITER);
+                        bufferedWriter.write(recordListElement.getRoomId());
+                        bufferedWriter.write(COMMA_DELIMITER);
 
-                addRecordFileWriter.append("" + record.getGuestId());
-                addRecordFileWriter.append(NEW_LINE_SEPARATOR);
+                        bufferedWriter.write(recordListElement.getAvailability());
+                        bufferedWriter.write(COMMA_DELIMITER);
 
-                System.out.println("Record added successfully. " + record.toString());
+                        bufferedWriter.write(recordListElement.getGuestId());
+                        bufferedWriter.write(NEW_LINE_SEPARATOR);
 
-            } catch (Exception e) {
+                        System.out.println("Record added successfully. " + recordListElement.toString());
 
-                System.out.println("Error while adding record to record file!");
-                e.printStackTrace();
+                    } catch (Exception e) {
 
-            } finally {
-
-                try {
-                    addRecordFileWriter.flush();
-                    addRecordFileWriter.close();
-
-                } catch (IOException e) {
-                    System.out.println("Error while flushing/closing file writer!");
-                    e.printStackTrace();
+                        System.out.println("Error while adding record to record file!");
+                        e.printStackTrace();
+                    }
                 }
             }
-        } else {
-            System.out.println("Sorry! There is no any available room now.");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        } finally {
+            try {
+                if(bufferedWriter != null) {
+                    bufferedWriter.flush();
+                    bufferedWriter.close();
+                } else {
+                    System.out.println("bufferedWriter is null!");
+
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-//    @Override
-//    public void onBookAdd(int guestId) {
-//        System.out.println("onBookAdd");
-//
-//    }
-//
-//    @Override
-//    public void onCancelReservation(int guestId) {
-//        System.out.println("onCancelReservation");
-//
-//    }
-//
-//    @Override
-//    public void onCheckIn(int guestId) {
-////TODO: onceden book kontrol var mı ekle
-//        System.out.println("onCheckIn");
-//    }
-//
-//    @Override
-//    public void onCheckOut(int guestId) {
-//        System.out.println("onCheckOut");
-//
-//    }
-//
-//    public RecordListener recordListener = null;
-//
-//    public void setRecordListener(RecordListener recordListener){
-//        System.out.println("onCheckOut");
-//
-//        this.recordListener = recordListener;
-//    }
+    public void addRecord(int guestId, int recordType) {
 
-    @Override
-    public void onRecordRequested(int guestId, int recordType) {
-        System.out.println("RecordFile onRecordRequested " );
+        int availableRoom = getFirstAvailableRoom();
+        int reservedRoomNoOfGuestId = getRoomOfGuestId(guestId);
+        int guestRoom = getRoomOfGuestId(guestId);
+        Record replacedRecord;
+
+        switch (recordType) {
+
+            case BOOK:
+                replacedRecord = new Record(availableRoom, BOOK, guestId);
+                break;
+
+            case CANCEL_RESERVATION:
+                replacedRecord = new Record(guestRoom, AVAILABLE, NO_ANY_GUEST);
+                break;
+
+            case CHECK_IN:
+                if (reservedRoomNoOfGuestId == -1) {
+                    System.out.println("CHECK_IN , there is no reservation.");
+                    replacedRecord = new Record(getFirstAvailableRoom(), CHECK_IN, guestId);
+                } else {
+                    System.out.println("CHECK_IN , there is reservation: " + reservedRoomNoOfGuestId);
+                    replacedRecord = new Record(reservedRoomNoOfGuestId, CHECK_IN, guestId);
+                }
+                break;
+
+            case CHECK_OUT:
+                replacedRecord = new Record(guestRoom, AVAILABLE, NO_ANY_GUEST);
+                break;
+
+            default:
+                return;
+        }
+
+        writeFile(replacedRecord);
 
     }
 }
+
+
+

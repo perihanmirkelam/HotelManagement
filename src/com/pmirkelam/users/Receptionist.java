@@ -1,39 +1,37 @@
 package com.pmirkelam.users;
 
+import com.pmirkelam.Constants;
+import com.pmirkelam.record.RecordFile;
+
+import static com.pmirkelam.Constants.*;
+
 public class Receptionist extends User {
 
-    private int id;
-
-    public Receptionist(int id) {
-        this.id = id;
-    }
-
-    public int getId() {
-        return id;
+    public Receptionist() {
+        super();
     }
 
     @Override
-    public void Book(int guestId) {
-        System.out.println("Book");
-
-        super.Book(guestId);
+    public void book(int guestId) {
+        super.book(guestId);
+        //TODO: do only book for self
     }
 
     @Override
-    public void CancelReservation(int guestId) {
-
-        System.out.println("CancelReservation");
-        super.CancelReservation(guestId);
+    public void cancelReservation(int guestId) {
+        super.cancelReservation(guestId);
+        //TODO: do only book for self
     }
 
-    @Override
-    public void CheckIn(int guestId) {
-        super.CheckIn(guestId);
+    public void checkIn(int guestId) {
+        System.out.println("checkIn");
+        //TODO: onceden book kontrol var mı ekle
+        RecordFile.getInstance().addRecord(guestId, CHECK_IN);
     }
 
-    @Override
-    public void CheckOut(int guestId) {
-        super.CheckOut(guestId);
+    public void checkOut(int guestId) {
+        System.out.println("checkOut");
+        RecordFile.getInstance().addRecord(guestId, CHECK_OUT);
     }
 
 }

@@ -1,8 +1,6 @@
 package com.pmirkelam.record;
 
-import static com.pmirkelam.Constants.GUEST;
-import static com.pmirkelam.Constants.RECEPTIONIST;
-import static com.pmirkelam.Constants.RECORDER_TYPE_RECEPTIONIST;
+import static com.pmirkelam.Constants.*;
 
 public class Record {
 
@@ -42,6 +40,9 @@ public class Record {
 
     @Override
     public String toString() {
-        return "Room No: " + roomId + ", Availability: " + availability + ", Guest ID: " + guestId;
+        String availabilityString = ((availability == AVAILABLE) ? "1 (Available) "
+                : (availability == RESERVED ? "2 (Reserved)  " :   "3 (Checked In)"));
+        return "Room No: " + roomId + ", Availability: "
+                + availabilityString + ", Guest ID: " + guestId;
     }
 }

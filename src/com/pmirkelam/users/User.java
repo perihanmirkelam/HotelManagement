@@ -1,49 +1,25 @@
 package com.pmirkelam.users;
 
-import com.pmirkelam.RecordListener;
-import com.pmirkelam.record.Record;
+import com.pmirkelam.BookingProcedure;
+import com.pmirkelam.Constants;
+import com.pmirkelam.record.RecordFile;
 
-import java.util.List;
+import static com.pmirkelam.Constants.BOOK;
+import static com.pmirkelam.Constants.CANCEL_RESERVATION;
 
-public class User {
-
-    private int userId;
-    private List<Record> records;
-    private RecordListener recordListener = null;
+public class User implements BookingProcedure {
 
     public User() {
-        System.out.println("User created");
     }
 
-    public void Book(int guestId) {
-        System.out.println("Book");
-
-        if(recordListener != null){
-            recordListener.onBookAdd(guestId);
-        }
-
+    @Override
+    public void book(int guestId) {
+        RecordFile.getInstance().addRecord(guestId, BOOK);
     }
 
-    public void CancelReservation(int guestId) {
-        if(recordListener != null){
-            recordListener.onCancelReservation(guestId);
-        }
-    }
-
-    public void CheckIn(int guestId) {
-        if(recordListener != null){
-            recordListener.onCheckIn(guestId);
-        }
-    }
-
-    public void CheckOut(int guestId) {
-        if(recordListener != null){
-            recordListener.onCheckOut(guestId);
-        }
-    }
-
-    public void setRecordListener(RecordListener recordListener){
-        this.recordListener = recordListener;
+    @Override
+    public void cancelReservation(int guestId) {
+        RecordFile.getInstance().addRecord(guestId, CANCEL_RESERVATION);
     }
 
 }
