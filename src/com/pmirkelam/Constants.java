@@ -9,8 +9,14 @@ public class Constants {
     public static final int RECORDER_TYPE_GUEST = 2;
 
     public static final int TOTAL_ROOM_NUMBER = 9;
+    public static final int TOTAL_GUEST_NUMBER = 3;
+    public static final int TOTAL_RECEPTIONIST_NUMBER = 2;
 
-    public static final String FILE_NAME = System.getProperty("user.home") + "/records.csv";
+
+
+    public static final String ROOM_FILE_NAME = System.getProperty("user.home") + "/records.csv";
+    public static final String LOGIN_GUEST_FILE_NAME = System.getProperty("user.home") + "/guestlogin.csv";
+    public static final String LOGIN_RECEPTIONIST_FILE_NAME = System.getProperty("user.home") + "/receptionistlogin.csv";
 
 
     public static final int AVAILABLE = 1;

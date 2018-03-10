@@ -21,7 +21,7 @@ public class RecordFile {
     private static RecordFile instance;
 
     private RecordFile() {
-        this.fileName = FILE_NAME;
+        this.fileName = ROOM_FILE_NAME;
         createRecordFile();
         printList();
     }
@@ -80,7 +80,7 @@ public class RecordFile {
 
                 try {
 
-                    initFileWriter.append("" + initRecord.getRoomId());
+                    initFileWriter.append("" + initRecord.getRoomNo());
                     initFileWriter.append(COMMA_DELIMITER);
 
                     initFileWriter.append("" + initRecord.getAvailability());
@@ -149,7 +149,6 @@ public class RecordFile {
                             //System.out.println("Get list: " + record.toString());
                             records.add(record);
                         } catch (NumberFormatException e) {
-                            System.out.println("List size:" + records.size() + " Last record: " + records.get(records.size() - 1).toString());
                             e.printStackTrace();
                         }
                     }
@@ -196,23 +195,23 @@ public class RecordFile {
     /**
      * @return index of available room. If not exist return -1
      */
-    public int getFirstAvailableRoom() {
+    public int getFirstAvailableRoomNo() {
 
         List<Record> records = getRecordList();
         for (int i = 0; i < TOTAL_ROOM_NUMBER; i++) {
             if (records.get(i).getAvailability() == AVAILABLE) {
-                return records.get(i).getRoomId();
+                return records.get(i).getRoomNo();
             }
         }
         return -1;
     }
 
-    public int getRoomOfGuestId(int guestId) {
+    public int getRoomNoOfGuestId(int guestId) {
 
         List<Record> records = getRecordList();
         for (Record record : records) {
             if (record.getGuestId() == guestId) {
-                return record.getRoomId();
+                return (record.getRoomNo());
             }
         }
         return -1;
@@ -228,10 +227,8 @@ public class RecordFile {
         	printWriter = new PrintWriter(fileName);
 
             if (list != null) {
-                System.out.println("replacedRecord.getRoomId() : " + replacedRecord.getRoomId());
-                System.out.println("list.size() : " + list.size());
-
-                list.set(replacedRecord.getRoomId()-1, replacedRecord);
+                System.out.println("Updated Record: " + replacedRecord.toString());
+                list.set(replacedRecord.getRoomNo() -1, replacedRecord);
                 Record recordListElement;
                 printWriter.println(FILE_HEADER);
                 for (int i = 0; i < TOTAL_ROOM_NUMBER; i++) {
@@ -239,7 +236,7 @@ public class RecordFile {
                     recordListElement = list.get(i);
                     try {
                       
-                        String recordFormat = recordListElement.getRoomId() + COMMA_DELIMITER + 
+                        String recordFormat = recordListElement.getRoomNo() + COMMA_DELIMITER +
                         		recordListElement.getAvailability()+ COMMA_DELIMITER + 
                         		recordListElement.getGuestId(); 
                         printWriter.println(recordFormat);
@@ -263,44 +260,40 @@ public class RecordFile {
 
     public void addRecord(int guestId, int recordType) {
 
-        int availableRoom = getFirstAvailableRoom();
-        int reservedRoomNoOfGuestId = getRoomOfGuestId(guestId);
-        int guestRoom = getRoomOfGuestId(guestId);
+        int availableRoomNo = getFirstAvailableRoomNo();
+        int reservedRoomNoOfGuestId = getRoomNoOfGuestId(guestId);
+        int guestRoomNo= getRoomNoOfGuestId(guestId);
         Record replacedRecord;
 
-        System.out.println("Available Room:" + availableRoom  + "ReservedRoomNoOfGuestId: " + reservedRoomNoOfGuestId + " GuestRoom: " + guestRoom);
+        System.out.println("First Available Room: " + availableRoomNo
+                + " | Reserved Room No Of Guest Id: " + reservedRoomNoOfGuestId
+                + " | Guest Room: " + guestRoomNo);
+
         switch (recordType) {
 
             case BOOK:
-                replacedRecord = new Record(availableRoom, RESERVED, guestId);
+                replacedRecord = new Record(availableRoomNo, RESERVED, guestId);
                 break;
 
             case CANCEL_RESERVATION:
-                replacedRecord = new Record(guestRoom, AVAILABLE, NO_ANY_GUEST);
+                replacedRecord = new Record(guestRoomNo, AVAILABLE, NO_ANY_GUEST);
                 break;
 
             case CHECK_IN:
                 if (reservedRoomNoOfGuestId == -1) {
-                    System.out.println("CHECK_IN , there is no reservation.");
-                    replacedRecord = new Record(getFirstAvailableRoom(), CHECKED_IN, guestId);
+                    replacedRecord = new Record(getFirstAvailableRoomNo(), CHECKED_IN, guestId);
                 } else {
-                    System.out.println("CHECK_IN , there is reservation: " + reservedRoomNoOfGuestId);
                     replacedRecord = new Record(reservedRoomNoOfGuestId, CHECKED_IN, guestId);
                 }
                 break;
 
             case CHECK_OUT:
-                replacedRecord = new Record(guestRoom, AVAILABLE, NO_ANY_GUEST);
+                replacedRecord = new Record(guestRoomNo, AVAILABLE, NO_ANY_GUEST);
                 break;
 
             default:
                 return;
         }
-
         writeFile(replacedRecord);
-
     }
 }
-
-
-

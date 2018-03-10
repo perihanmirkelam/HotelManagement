@@ -14,7 +14,7 @@ public class Record {
         this.guestId = guestId;
     }
 
-    public int getRoomId() {
+    public int getRoomNo() {
         return roomId;
     }
 
