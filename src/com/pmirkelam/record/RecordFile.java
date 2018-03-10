@@ -220,11 +220,12 @@ public class RecordFile {
 
     private void writeFile(Record replacedRecord) {
 
-        BufferedWriter bufferedWriter = null;
+    	PrintWriter printWriter = null;
         List<Record> list = getRecordList();
+        String FILE_HEADER = "Room ID, Availability, Guest ID";
 
         try {
-            bufferedWriter = new BufferedWriter(new FileWriter(fileName, true));
+        	printWriter = new PrintWriter(fileName);
 
             if (list != null) {
                 System.out.println("replacedRecord.getRoomId() : " + replacedRecord.getRoomId());
@@ -232,22 +233,16 @@ public class RecordFile {
 
                 list.set(replacedRecord.getRoomId()-1, replacedRecord);
                 Record recordListElement;
-
+                printWriter.println(FILE_HEADER);
                 for (int i = 0; i < TOTAL_ROOM_NUMBER; i++) {
 
                     recordListElement = list.get(i);
                     try {
-                        bufferedWriter.newLine();
-
-                        bufferedWriter.write(recordListElement.getRoomId());
-                        bufferedWriter.write(COMMA_DELIMITER);
-
-                        bufferedWriter.write(recordListElement.getAvailability());
-                        bufferedWriter.write(COMMA_DELIMITER);
-
-                        bufferedWriter.write(recordListElement.getGuestId());
-                        bufferedWriter.write(NEW_LINE_SEPARATOR);
-
+                      
+                        String recordFormat = recordListElement.getRoomId() + COMMA_DELIMITER + 
+                        		recordListElement.getAvailability()+ COMMA_DELIMITER + 
+                        		recordListElement.getGuestId(); 
+                        printWriter.println(recordFormat);
                         System.out.println("Record added successfully. " + recordListElement.toString());
 
                     } catch (Exception e) {
@@ -262,17 +257,7 @@ public class RecordFile {
             e.printStackTrace();
 
         } finally {
-            try {
-                if(bufferedWriter != null) {
-                    bufferedWriter.flush();
-                    bufferedWriter.close();
-                } else {
-                    System.out.println("bufferedWriter is null!");
-
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            	printWriter.close();
         }
     }
 
@@ -283,10 +268,11 @@ public class RecordFile {
         int guestRoom = getRoomOfGuestId(guestId);
         Record replacedRecord;
 
+        System.out.println("Available Room:" + availableRoom  + "ReservedRoomNoOfGuestId: " + reservedRoomNoOfGuestId + " GuestRoom: " + guestRoom);
         switch (recordType) {
 
             case BOOK:
-                replacedRecord = new Record(availableRoom, BOOK, guestId);
+                replacedRecord = new Record(availableRoom, RESERVED, guestId);
                 break;
 
             case CANCEL_RESERVATION:
@@ -296,10 +282,10 @@ public class RecordFile {
             case CHECK_IN:
                 if (reservedRoomNoOfGuestId == -1) {
                     System.out.println("CHECK_IN , there is no reservation.");
-                    replacedRecord = new Record(getFirstAvailableRoom(), CHECK_IN, guestId);
+                    replacedRecord = new Record(getFirstAvailableRoom(), CHECKED_IN, guestId);
                 } else {
                     System.out.println("CHECK_IN , there is reservation: " + reservedRoomNoOfGuestId);
-                    replacedRecord = new Record(reservedRoomNoOfGuestId, CHECK_IN, guestId);
+                    replacedRecord = new Record(reservedRoomNoOfGuestId, CHECKED_IN, guestId);
                 }
                 break;
 
